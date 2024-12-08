@@ -43,17 +43,21 @@ class UserManager:
                     users_data = json.load(file)
                     for email, data in users_data.items():
                         self.users[email] = User(
-                            username=data["username"],
+                            username=data.get("username", "Unknown"),
                             email=email,
-                            password=data["password"],
+                            password=data.get("password", ""),
                             profile=data.get("profile", {}),
                             wallets=data.get("wallets", [])
                         )
                 except json.JSONDecodeError:
                     messagebox.showerror("Error", "Failed to decode users.json. The file might be corrupted.")
                     self.users = {}
+                except KeyError as e:
+                    messagebox.showerror("Error", f"Missing expected key in users.json: {e}")
+                    self.users = {}
         else:
             self.users = {}
+
 
     def save_users(self):
         users_data = {email: user.to_dict() for email, user in self.users.items()}
